@@ -70,4 +70,10 @@ jobs:
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "${{ github.ref_name }}" artifacts/*/* --title "${{ github.ref_name }}" --generate-notes
+        run: |
+          extra_args=()
+          # A hyphen in the tag (e.g. v0.1.0-beta.1) marks a semver pre-release.
+          if [[ "${{ github.ref_name }}" == *-* ]]; then
+            extra_args+=(--prerelease)
+          fi
+          gh release create "${{ github.ref_name }}" artifacts/*/* --title "${{ github.ref_name }}" --generate-notes "${extra_args[@]}"
