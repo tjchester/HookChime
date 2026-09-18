@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\HookChime.Core\HookChime.Core.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net10.0-windows10.0.19041.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.Contains('windows'))">
+    <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+  </PropertyGroup>
+
+  <!-- The WinRT toast notifier only compiles into the windows-qualified TFM. -->
+  <ItemGroup Condition="!$(TargetFramework.Contains('windows'))">
+    <Compile Remove="Windows\**\*.cs" />
+  </ItemGroup>
+
+
+</Project>

@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [win-x64, osx-x64, osx-arm64, linux-x64, linux-arm64]
+        include:
+          - rid: win-x64
+            tfm: net10.0-windows10.0.19041.0
+          - rid: osx-x64
+            tfm: net10.0
+          - rid: osx-arm64
+            tfm: net10.0
+          - rid: linux-x64
+            tfm: net10.0
+          - rid: linux-arm64
+            tfm: net10.0
+    # A self-contained publish just downloads the target runtime's packaged files via
+    # NuGet — no native compilation happens — so every RID can be published from the
+    # same Windows runner rather than needing five OS-specific jobs.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Publish ${{ matrix.rid }}
+        run: >
+          dotnet publish src/HookChime.Cli/HookChime.Cli.csproj
+          -c Release -r ${{ matrix.rid }} -f ${{ matrix.tfm }}
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o publish/${{ matrix.rid }}
+      - name: Package
+        shell: pwsh
+        run: |
+          $rid = "${{ matrix.rid }}"
+          Push-Location "publish/$rid"
+          if ($rid.StartsWith("win")) {
+            Compress-Archive -Path * -DestinationPath "../../hookchime-$rid.zip"
+          } else {
+            tar -czf "../../hookchime-$rid.tar.gz" *
+          }
+          Pop-Location
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hookchime-${{ matrix.rid }}
+          path: hookchime-${{ matrix.rid }}.*
+
+  release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${{ github.ref_name }}" artifacts/*/* --title "${{ github.ref_name }}" --generate-notes

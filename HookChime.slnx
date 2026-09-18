@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HookChime.Cli/HookChime.Cli.csproj" />
+    <Project Path="src/HookChime.Core/HookChime.Core.csproj" />
+    <Project Path="src/HookChime.Notifications/HookChime.Notifications.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/HookChime.Tests/HookChime.Tests.csproj" />
+  </Folder>
+</Solution>
