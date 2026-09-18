@@ -8,6 +8,11 @@
     <TargetFrameworks>net10.0;net10.0-windows10.0.19041.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Lets restore/build touch the windows-qualified TFM's reference assemblies from
+         Linux/macOS CI runners (they're just NuGet metadata, no real Windows needed to
+         compile against them) — without this, restoring this multi-targeted project at
+         all fails on non-Windows even when only building the net10.0 TFM. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.Contains('windows'))">
