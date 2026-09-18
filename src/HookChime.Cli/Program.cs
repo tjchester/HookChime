@@ -139,6 +139,17 @@ internal static class Cli
             return 1;
         }
 
+        // Coding agents pipe a JSON payload over stdin to their hook commands (Claude
+        // Code's Stop hook, Copilot's sessionEnd hook, etc.) — when present, use it to
+        // say which project actually finished, since the installed hook command itself
+        // always passes the same static message ("Task complete") regardless of which
+        // repo/session triggered it.
+        var payload = HookPayloadReader.TryReadFromStdin();
+        if (payload?.ProjectName is { Length: > 0 } projectName)
+        {
+            message = $"{message} — {projectName}";
+        }
+
         var exePath = Environment.ProcessPath ?? "hookchime";
         var notifier = NotifierFactory.Create(Constants.AppId);
         var request = new NotificationRequest(title, message, iconPath ?? DefaultIcon.ExtractToTempFile());
@@ -149,6 +160,7 @@ internal static class Cli
             Console.WriteLine($"[dry-run] Message: {message}");
             Console.WriteLine($"[dry-run] Icon: {request.IconPath ?? "(none)"}");
             Console.WriteLine($"[dry-run] Exe path: {exePath}");
+            Console.WriteLine($"[dry-run] Hook payload (stdin): {(payload is null ? "(none)" : $"cwd={payload.Cwd}, event={payload.HookEventName}, session={payload.SessionId}")}");
             Console.WriteLine("[dry-run] Notifier call:");
             Console.WriteLine(notifier.DescribeDryRun(request));
             Console.WriteLine(NtfyClient.IsConfigured
