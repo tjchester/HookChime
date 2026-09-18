@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- See /NOTICE.md: this asset is under the VS Image Library EULA, not this project's MIT license. -->
+    <EmbeddedResource Include="Assets\hookchime.png" LogicalName="HookChime.Core.Assets.hookchime.png" />
+  </ItemGroup>
+
 </Project>

@@ -141,13 +141,13 @@ internal static class Cli
 
         var exePath = Environment.ProcessPath ?? "hookchime";
         var notifier = NotifierFactory.Create(Constants.AppId);
-        var request = new NotificationRequest(title, message, iconPath);
+        var request = new NotificationRequest(title, message, iconPath ?? DefaultIcon.ExtractToTempFile());
 
         if (dryRun)
         {
             Console.WriteLine($"[dry-run] Title: {title}");
             Console.WriteLine($"[dry-run] Message: {message}");
-            Console.WriteLine($"[dry-run] Icon: {iconPath ?? "(none)"}");
+            Console.WriteLine($"[dry-run] Icon: {request.IconPath ?? "(none)"}");
             Console.WriteLine($"[dry-run] Exe path: {exePath}");
             Console.WriteLine("[dry-run] Notifier call:");
             Console.WriteLine(notifier.DescribeDryRun(request));

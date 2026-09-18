@@ -1,5 +1,7 @@
 # HookChime
 
+<img src="assets/icon/hookchime.png" alt="HookChime bell icon" width="96" align="right">
+
 A cross-platform (Windows / macOS / Linux) CLI that shows a desktop notification when
 your AI coding agent (Claude Code, Gemini CLI, GitHub Copilot CLI, Codex) finishes a
 task, by hooking into each agent's built-in hook/notify mechanism.
@@ -109,6 +111,12 @@ Self-contained, single-file builds per OS/architecture (`win-x64`, `osx-x64`,
 `osx-arm64`, `linux-x64`, `linux-arm64`) are published from CI — no .NET runtime
 install required on the target machine.
 
+## Icon
+
+The bell icon (`assets/icon/hookchime.ico` / `.png`) is adapted from the Microsoft
+Visual Studio Image Library and is licensed separately from the rest of this repo —
+see [NOTICE.md](NOTICE.md).
+
 ## License
 
-MIT
+MIT (see [NOTICE.md](NOTICE.md) for the one exception: the application icon).
