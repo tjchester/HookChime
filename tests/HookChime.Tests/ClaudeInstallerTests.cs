@@ -1,3 +1,4 @@
+using System.Text.Json;
 using HookChime.Core.HookInstallers;
 
 namespace HookChime.Tests;
@@ -98,5 +99,30 @@ public class ClaudeInstallerTests : IDisposable
     public void Uninstall_NoOpWhenNothingInstalled()
     {
         Assert.True(_installer.Uninstall());
+    }
+
+    [Fact]
+    public void Install_QuotesWindowsPathSafelyForBashExecution()
+    {
+        // Regression test: Claude Code runs the "command" string through bash (even on
+        // Windows, e.g. via Git Bash). Unquoted, bash treats \ as an escape character
+        // and strips it before the next char, mangling ANY Windows path — this one has
+        // no spaces, which used to be (wrongly) treated as "safe, no quoting needed".
+        Directory.CreateDirectory(Path.Combine(_home.Path, ".claude"));
+        _installer.Install(@"C:\Users\tjche\.local\bin\hookchime.exe");
+
+        var json = File.ReadAllText(Path.Combine(_home.Path, ".claude", "settings.json"));
+        using var doc = JsonDocument.Parse(json);
+        var command = doc.RootElement
+            .GetProperty("hooks").GetProperty("Stop")[0]
+            .GetProperty("hooks")[0].GetProperty("command").GetString();
+
+        // The decoded command value must have each backslash doubled, so that after
+        // bash's own double-quote unescaping, the exe path survives with single
+        // backslashes intact.
+        var expected = """
+            "C:\\Users\\tjche\\.local\\bin\\hookchime.exe" "Task complete" -t "Claude Code"
+            """;
+        Assert.Equal(expected, command);
     }
 }

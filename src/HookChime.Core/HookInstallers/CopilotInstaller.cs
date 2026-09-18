@@ -31,12 +31,15 @@ public sealed class CopilotInstaller(string? workingDirectory = null) : IAgentIn
 
         if (JsonHookUtils.ContainsHookChimeEntry(sessionEnd)) return true; // already installed
 
-        var escapedPath = exePath.Replace("\\", "\\\\");
+        // No manual backslash-doubling here: System.Text.Json JSON-escapes this string
+        // automatically on write, and PowerShell (unlike bash) doesn't treat backslash
+        // as an escape character, so the path only needs simple quoting.
+        var quotedPath = ConfigFileUtils.WindowsQuote(exePath);
         var hookObj = new JsonObject
         {
             ["type"] = "command",
             ["bash"] = "hookchime 'Copilot finished' -t 'GitHub Copilot'",
-            ["powershell"] = $"{escapedPath} 'Copilot finished' -t 'GitHub Copilot'",
+            ["powershell"] = $"{quotedPath} 'Copilot finished' -t 'GitHub Copilot'",
             ["timeoutSec"] = 5,
         };
 
