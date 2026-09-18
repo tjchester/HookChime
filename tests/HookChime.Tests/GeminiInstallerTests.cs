@@ -1,3 +1,4 @@
+using System.Text.Json;
 using HookChime.Core.HookInstallers;
 
 namespace HookChime.Tests;
@@ -47,5 +48,23 @@ public class GeminiInstallerTests : IDisposable
         var content = File.ReadAllText(Path.Combine(dir, "settings.json"));
         Assert.Contains("someOtherTool", content);
         Assert.DoesNotContain("hookchime.exe", content);
+    }
+
+    [Fact]
+    public void Install_QuotesWindowsPathSafelyForBashExecution()
+    {
+        Directory.CreateDirectory(Path.Combine(_home.Path, ".gemini"));
+        _installer.Install(@"C:\Users\tjche\.local\bin\hookchime.exe");
+
+        var json = File.ReadAllText(Path.Combine(_home.Path, ".gemini", "settings.json"));
+        using var doc = JsonDocument.Parse(json);
+        var command = doc.RootElement
+            .GetProperty("hooks").GetProperty("AfterAgent")[0]
+            .GetProperty("hooks")[0].GetProperty("command").GetString();
+
+        var expected = """
+            "C:\\Users\\tjche\\.local\\bin\\hookchime.exe" "Gemini finished" -t "Gemini"
+            """;
+        Assert.Equal(expected, command);
     }
 }

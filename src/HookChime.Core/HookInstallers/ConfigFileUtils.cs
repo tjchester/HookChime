@@ -36,7 +36,29 @@ internal static class ConfigFileUtils
         }
     }
 
-    /// <summary>Wraps an absolute exe path in quotes only if it contains a space, matching shell quoting rules.</summary>
-    public static string QuoteIfNeeded(string exePath) =>
-        exePath.Contains(' ') ? $"\"{exePath}\"" : exePath;
+    /// <summary>
+    /// Quotes a path for a command line that will be parsed by a POSIX shell (bash/sh) —
+    /// which is how Claude Code and Gemini CLI invoke hook commands, even on Windows
+    /// (e.g. via Git Bash). Unquoted, bash treats backslash as an escape character and
+    /// silently strips it before the next character, mangling any Windows path
+    /// (C:\Users\... -> CUsers...) whether or not it contains spaces — quoting alone
+    /// isn't enough either, since bash still un-escapes backslashes inside double quotes,
+    /// so each backslash must also be doubled.
+    /// </summary>
+    public static string PosixQuote(string value)
+    {
+        var escaped = value
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("$", "\\$")
+            .Replace("`", "\\`");
+        return $"\"{escaped}\"";
+    }
+
+    /// <summary>
+    /// Quotes a path for a command line that PowerShell will parse (e.g. Copilot's
+    /// "powershell" hook variant). PowerShell's escape character is backtick, not
+    /// backslash, so — unlike PosixQuote — backslashes must NOT be doubled here.
+    /// </summary>
+    public static string WindowsQuote(string value) => $"\"{value}\"";
 }

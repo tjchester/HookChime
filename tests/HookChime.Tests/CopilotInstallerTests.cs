@@ -1,3 +1,4 @@
+using System.Text.Json;
 using HookChime.Core.HookInstallers;
 
 namespace HookChime.Tests;
@@ -42,5 +43,24 @@ public class CopilotInstallerTests : IDisposable
         Assert.True(_installer.Uninstall());
 
         Assert.False(File.Exists(Path.Combine(_repo.Path, ".github", "hooks", "hookchime.json")));
+    }
+
+    [Fact]
+    public void Install_PowerShellCommandKeepsSingleBackslashes()
+    {
+        // PowerShell's escape char is backtick, not backslash, so (unlike the bash-run
+        // Claude/Gemini commands) this path must NOT have its backslashes doubled.
+        Directory.CreateDirectory(Path.Combine(_repo.Path, ".github"));
+        _installer.Install(@"C:\Users\tjche\.local\bin\hookchime.exe");
+
+        var json = File.ReadAllText(Path.Combine(_repo.Path, ".github", "hooks", "hookchime.json"));
+        using var doc = JsonDocument.Parse(json);
+        var powershell = doc.RootElement
+            .GetProperty("hooks").GetProperty("sessionEnd")[0]
+            .GetProperty("powershell").GetString();
+
+        Assert.Equal(
+            "\"C:\\Users\\tjche\\.local\\bin\\hookchime.exe\" 'Copilot finished' -t 'GitHub Copilot'",
+            powershell);
     }
 }

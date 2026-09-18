@@ -28,7 +28,7 @@ public sealed class GeminiInstaller(string? homeDirectory = null) : IAgentInstal
 
         if (JsonHookUtils.ContainsHookChimeEntry(afterAgent)) return true; // already installed
 
-        var quoted = ConfigFileUtils.QuoteIfNeeded(exePath);
+        var quoted = ConfigFileUtils.PosixQuote(exePath);
         var innerHook = new JsonObject
         {
             ["type"] = "command",
