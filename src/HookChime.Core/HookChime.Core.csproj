@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Icon artwork is from Tabler Icons (MIT); see /NOTICE.md. -->
+    <EmbeddedResource Include="Assets\hookchime.png" LogicalName="HookChime.Core.Assets.hookchime.png" />
+  </ItemGroup>
+
 </Project>

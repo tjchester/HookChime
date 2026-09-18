@@ -17,6 +17,8 @@
 
   <PropertyGroup Condition="$(TargetFramework.Contains('windows'))">
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+    <!-- Only meaningful on Windows (embeds into the PE resources); icon artwork is from Tabler Icons (MIT); see /NOTICE.md. -->
+    <ApplicationIcon>..\..\assets\icon\hookchime.ico</ApplicationIcon>
   </PropertyGroup>
 
 </Project>
