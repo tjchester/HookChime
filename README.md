@@ -45,6 +45,19 @@ Options:
 chain) and applies the matching title automatically — no `--app` flag needed for the
 supported agents.
 
+## Richer messages from the hook payload
+
+Claude Code, Gemini CLI, and GitHub Copilot CLI all pipe a JSON payload over stdin to
+their hook commands (e.g. Claude Code's Stop hook sends `{"cwd", "session_id",
+"transcript_path", "hook_event_name", ...}`). When `hookchime` detects that stdin is
+piped, it reads that payload and appends the project name (the last path segment of
+`cwd`) to the message — so instead of every notification saying the same static
+`"Task complete"` regardless of which repo or session triggered it, you get `"Task
+complete — my-repo-name"`. This only kicks in when stdin is actually redirected (never
+blocks waiting for input when you run `hookchime` manually from a terminal), and any
+parse failure is silently ignored — enrichment is a nice-to-have, never a reason a
+notification fails to show.
+
 ## Push notifications (ntfy)
 
 Set `HOOKCHIME_NTFY_TOPIC` (and optionally `HOOKCHIME_NTFY_SERVER`, default `ntfy.sh`)
