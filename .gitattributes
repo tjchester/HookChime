@@ -1,0 +1,15 @@
+# Store LF in the repository; check out the native line ending for the current OS.
+* text=auto
+
+# Files that must keep a specific ending on every OS.
+*.sh  text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Never touch binary files.
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.icns binary
+*.gif  binary
+*.webp binary
