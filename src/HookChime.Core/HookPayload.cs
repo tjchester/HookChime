@@ -17,9 +17,24 @@ public sealed record HookPayload(
     string? TranscriptPath,
     string? Reason)
 {
-    /// <summary>The last path segment of Cwd (e.g. a repo/folder name), or null if Cwd is unavailable.</summary>
-    public string? ProjectName =>
-        string.IsNullOrEmpty(Cwd) ? null : Path.GetFileName(Cwd.TrimEnd('/', '\\')) is { Length: > 0 } name ? name : null;
+    /// <summary>
+    /// The last path segment of Cwd (e.g. a repo/folder name), or null if Cwd is unavailable.
+    /// Splits on both '/' and '\' itself: Path.GetFileName only honors '\' on Windows, so a
+    /// Windows-style cwd reported by an agent would come back whole on Linux/macOS.
+    /// </summary>
+    public string? ProjectName
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(Cwd)) return null;
+
+            var trimmed = Cwd.TrimEnd('/', '\\');
+            var name = trimmed[(trimmed.LastIndexOfAny(['/', '\\']) + 1)..];
+
+            // A bare drive root ("C:\") leaves just "C:", which isn't a project name.
+            return name.Length > 0 && !name.EndsWith(':') ? name : null;
+        }
+    }
 }
 
 public static class HookPayloadReader

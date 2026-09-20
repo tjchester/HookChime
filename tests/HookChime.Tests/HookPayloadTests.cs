@@ -65,4 +65,18 @@ public class HookPayloadTests
 
         Assert.Equal("HookChime", payload!.ProjectName);
     }
+
+    // Must resolve the same on every OS: Path.GetFileName only splits on '\' on Windows.
+    [Theory]
+    [InlineData(@"C:\Users\tjche\repos\HookChime", "HookChime")]
+    [InlineData(@"C:\Users\tjche\repos\HookChime\", "HookChime")]
+    [InlineData("/home/user/repos/HookChime", "HookChime")]
+    [InlineData(@"C:\", null)]
+    [InlineData("/", null)]
+    public void ProjectName_SplitsOnEitherSeparator(string cwd, string? expected)
+    {
+        var payload = new HookPayload(cwd, null, null, null, null);
+
+        Assert.Equal(expected, payload.ProjectName);
+    }
 }
